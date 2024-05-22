@@ -19,6 +19,7 @@ class PersonalStorySerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer(read_only=True)
     content = serializers.CharField(read_only=True)
     raw_content = serializers.CharField(write_only=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
     def save(self, **kwargs):
         user = self.context["user"]

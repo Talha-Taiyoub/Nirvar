@@ -14,16 +14,16 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 class AudienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Audience
-        fields = ["id", "user", "gender", "age", "education", "address", "created_at"]
+        fields = ["user", "gender", "age", "education", "address", "created_at"]
 
     user = SimpleUserSerializer(read_only=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
 
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
         fields = [
-            "id",
             "user",
             "gender",
             "age",
@@ -38,3 +38,4 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     user = SimpleUserSerializer(read_only=True)
     verified = serializers.BooleanField(read_only=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
