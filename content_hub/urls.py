@@ -4,7 +4,9 @@ from rest_framework_nested.routers import DefaultRouter, NestedDefaultRouter
 from . import views
 
 router = DefaultRouter()
-router.register("testimonials", views.TestimonialViewSet, basename="testimonial")
+router.register(
+    "personal_stories", views.PersonalStoryViewSet, basename="personal_story"
+)
 
 urlpatterns = [
     path("", include(router.urls)),

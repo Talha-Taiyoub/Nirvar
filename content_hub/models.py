@@ -8,7 +8,7 @@ USER = settings.AUTH_USER_MODEL
 
 
 # image and user will be added later
-class Testimonial(models.Model):
+class Personal_Story(models.Model):
     title = models.CharField(max_length=255)
     raw_content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
