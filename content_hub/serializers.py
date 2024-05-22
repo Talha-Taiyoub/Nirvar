@@ -22,9 +22,7 @@ class PersonalStorySerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         user = self.context["user"]
-        self.instance = Personal_Story.objects.create(
-            **self.validated_data, user_id=user.id
-        )
+        self.instance = Personal_Story.objects.create(**self.validated_data, user=user)
         return self.instance
 
 
