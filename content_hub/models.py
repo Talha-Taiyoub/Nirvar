@@ -8,7 +8,7 @@ USER = settings.AUTH_USER_MODEL
 
 
 # image and user will be added later
-class Article(models.Model):
+class Testimonial(models.Model):
     title = models.CharField(max_length=255)
     raw_content = models.TextField()
 
