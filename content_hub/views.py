@@ -15,6 +15,7 @@ class PersonalStoryViewSet(ModelViewSet):
     serializer_class = PersonalStorySerializer
 
     def get_serializer_class(self):
+
         if self.request.method == "PATCH":
             return UpdatePersonalStorySerializer
         else:
@@ -22,6 +23,16 @@ class PersonalStoryViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {"user": self.request.user}
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = UpdatePersonalStorySerializer(
+            instance, data=request.data, context={"user": request.user}
+        )
+        serializer.is_valid(raise_exception=True)
+        personal_story = serializer.save()
+        serializer = PersonalStorySerializer(personal_story)
+        return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

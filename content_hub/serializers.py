@@ -1,30 +1,37 @@
 from rest_framework import serializers
 
+from core.models import User
+
 from .models import Personal_Story
 
 
-class PersonalStorySerializer(serializers.ModelSerializer):
-    raw_content = serializers.CharField(write_only=True)
-    content = serializers.CharField(read_only=True)
+class SimpleUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username"]
 
+
+class PersonalStorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Personal_Story
-        fields = ["id", "user", "title", "raw_content", "content", "created_at"]
+        fields = ["id", "user", "title", "content", "raw_content", "created_at"]
 
-    def to_representation(self, personal_story):
-        representation = super().to_representation(personal_story)
-        representation["user"] = personal_story.user.username
-        return representation
+    user = SimpleUserSerializer(read_only=True)
+    content = serializers.CharField(read_only=True)
+    raw_content = serializers.CharField(write_only=True)
+
+    def save(self, **kwargs):
+        user = self.context["user"]
+        self.instance = Personal_Story.objects.create(
+            **self.validated_data, user_id=user.id
+        )
+        return self.instance
 
 
 class UpdatePersonalStorySerializer(serializers.ModelSerializer):
-    raw_content = serializers.CharField(write_only=True)
-    content = serializers.CharField(read_only=True)
-    user = serializers.StringRelatedField(read_only=True)
-
     class Meta:
         model = Personal_Story
-        fields = ["id", "user", "title", "raw_content", "content", "created_at"]
+        fields = ["title", "raw_content"]
 
     def save(self, **kwargs):
         personal_story = self.instance
