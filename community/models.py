@@ -11,25 +11,32 @@ GENDER_CHOICES = [(MALE, "Male"), (FEMALE, "Female")]
 
 # image will be added later
 class Audience(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default=MALE)
-    age = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(7), MaxValueValidator(120)]
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True
     )
-    education = models.CharField(max_length=50)
-    address = models.CharField(max_length=50)
+    gender = models.CharField(
+        max_length=1, choices=GENDER_CHOICES, default=MALE, null=True, blank=True
+    )
+    age = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(7), MaxValueValidator(120)], null=True, blank=True
+    )
+    education = models.CharField(max_length=200, null=True, blank=True)
+    address = models.CharField(max_length=200, null=True, blank=True)
 
 
 # image and certificates will be added later
 class Doctor(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default=MALE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True
+    )
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     age = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(7), MaxValueValidator(120)]
     )
-    education = models.CharField(max_length=50)
-    address = models.CharField(max_length=50)
-    medical_college = models.CharField(max_length=50)
-    degree = models.CharField(max_length=50)
-    linkedIn = models.CharField(max_length=50)
+    education = models.CharField(max_length=200)
+    address = models.CharField(max_length=200)
+    medical_college = models.CharField(max_length=200)
+    degree = models.CharField(max_length=200)
+    linkedIn = models.URLField(max_length=200)
     year_of_passing = models.DateField()
+    verified = models.BooleanField(default=False)
