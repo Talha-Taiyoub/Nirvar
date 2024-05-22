@@ -11,6 +11,8 @@ USER = settings.AUTH_USER_MODEL
 class Testimonial(models.Model):
     title = models.CharField(max_length=255)
     raw_content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(USER, on_delete=models.CASCADE, default=1)
 
     @property
     def content(self):
