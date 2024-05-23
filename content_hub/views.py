@@ -1,8 +1,11 @@
 from django.db.models import Avg, Count, Min, Sum
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+
+from core.permissions import IsDoctor
 
 from .models import (
     Answer,
@@ -23,18 +26,23 @@ from .serializers import (
 
 # Create your views here.
 class TestimonialViewSet(ModelViewSet):
-    http_method_names = ["get", "patch", "post", "delete"]
+    http_method_names = ["get", "put", "post", "delete"]
     queryset = Testimonial.objects.all().select_related("user")
     serializer_class = TestimonialSerializer
 
     def get_serializer_class(self):
-        if self.request.method == "PATCH":
+        if self.request.method == "PUT":
             return UpdateTestimonialSerializer
         else:
             return TestimonialSerializer
 
     def get_serializer_context(self):
         return {"user": self.request.user}
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "POST", "DELETE"]:
+            return [IsAuthenticated]
+        return [AllowAny()]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -64,7 +72,7 @@ class TestimonialViewSet(ModelViewSet):
     #     serializer = self.get_serializer(queryset, many=True)
     #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def me(self, request):
         user = request.user
         queryset = Testimonial.objects.filter(user_id=user.id).select_related("user")
@@ -88,6 +96,11 @@ class PersonalStoryViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {"user": self.request.user}
+
+    def get_permissions(self):
+        if self.request.method in ["PATCH", "POST", "DELETE"]:
+            return [IsAuthenticated]
+        return [AllowAny()]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -121,7 +134,7 @@ class PersonalStoryViewSet(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def me(self, request):
         user = request.user
         queryset = (
