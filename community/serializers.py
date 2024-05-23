@@ -15,7 +15,15 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 class AudienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Audience
-        fields = ["user", "gender", "age", "education", "address", "created_at"]
+        fields = [
+            "user",
+            "gender",
+            "age",
+            "education",
+            "address",
+            "profile_photo",
+            "created_at",
+        ]
 
     user = SimpleUserSerializer(read_only=True)
     created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
@@ -33,6 +41,7 @@ class DoctorSerializer(serializers.ModelSerializer):
             "degree",
             "linkedIn",
             "year_of_passing",
+            "profile_photo",
             "verified",
             "created_at",
         ]
@@ -69,6 +78,7 @@ class UpdateDoctorSerializer(serializers.ModelSerializer):
             "degree",
             "linkedIn",
             "year_of_passing",
+            "profile_photo",
         ]
 
     year_of_passing = serializers.DateField(
@@ -87,6 +97,12 @@ class UpdateDoctorSerializer(serializers.ModelSerializer):
             doctor.degree = self.validated_data["degree"]
             doctor.linkedIn = self.validated_data["linkedIn"]
             doctor.year_of_passing = self.validated_data["year_of_passing"]
+
+            if (
+                "profile_photo" in self.validated_data
+                and self.validated_data["profile_photo"] is not None
+            ):
+                doctor.profile_photo = self.validated_data["profile_photo"]
             doctor.save()
             self.instance = doctor
             return self.instance

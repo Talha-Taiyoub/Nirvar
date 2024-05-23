@@ -16,10 +16,12 @@ class Audience(models.Model):
     )
     education = models.CharField(max_length=200, null=True, blank=True)
     address = models.CharField(max_length=200, null=True, blank=True)
+    profile_photo = models.ImageField(
+        upload_to="community/images", null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now=True)
 
 
-# image and certificates will be added later
 class Doctor(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True
@@ -33,5 +35,8 @@ class Doctor(models.Model):
     degree = models.CharField(max_length=200)
     linkedIn = models.URLField(max_length=200)
     year_of_passing = models.DateField()
+    profile_photo = models.ImageField(
+        upload_to="community/images", null=True, blank=True
+    )
     verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

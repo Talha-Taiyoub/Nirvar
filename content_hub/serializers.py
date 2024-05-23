@@ -62,9 +62,9 @@ class PersonalStoryImageSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         personal_story_id = self.context["personal_story_id"]
-        testimonial = Personal_Story.objects.get(id=personal_story_id)
+        personal_story = Personal_Story.objects.get(id=personal_story_id)
         return PersonalStoryImage.objects.create(
-            testimonial=testimonial, **validated_data
+            personal_story=personal_story, **validated_data
         )
 
 

@@ -10,11 +10,11 @@ from .serializers import AudienceSerializer, DoctorSerializer, UpdateDoctorSeria
 
 
 class AudienceViewSet(ModelViewSet):
-    http_method_names = ["get", "patch"]
+    http_method_names = ["get", "put"]
     queryset = Audience.objects.all().select_related("user")
     serializer_class = AudienceSerializer
 
-    @action(detail=False, methods=["get", "patch"])
+    @action(detail=False, methods=["get", "put"])
     def me(self, request):
         user = request.user
         audience = get_object_or_404(Audience, user=user)
@@ -23,7 +23,7 @@ class AudienceViewSet(ModelViewSet):
             serializer = self.get_serializer(audience)
             return Response(serializer.data)
 
-        elif request.method == "PATCH":
+        elif request.method == "PUT":
             serializer = self.get_serializer(audience, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -37,7 +37,7 @@ class DoctorViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {"user": self.request.user}
 
-    @action(detail=False, methods=["get", "patch"])
+    @action(detail=False, methods=["get", "put"])
     def me(self, request):
         user = request.user
         doctor = get_object_or_404(Doctor, user=user)
@@ -46,7 +46,7 @@ class DoctorViewSet(ModelViewSet):
             serializer = DoctorSerializer(doctor)
             return Response(serializer.data)
 
-        elif request.method == "PATCH":
+        elif request.method == "PUT":
             serializer = UpdateDoctorSerializer(
                 doctor, data=request.data, context={"user": request.user}
             )
