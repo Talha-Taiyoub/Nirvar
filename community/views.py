@@ -14,7 +14,7 @@ class AudienceViewSet(ModelViewSet):
     queryset = Audience.objects.all().select_related("user")
     serializer_class = AudienceSerializer
 
-    @action(detail=False, methods=["get", "put"])
+    @action(detail=False, methods=["get", "put"], permission_classes=[IsAuthenticated])
     def me(self, request):
         user = request.user
         audience = get_object_or_404(Audience, user=user)
@@ -37,7 +37,7 @@ class DoctorViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {"user": self.request.user}
 
-    @action(detail=False, methods=["get", "put"])
+    @action(detail=False, methods=["get", "put"], permission_classes=[IsAuthenticated])
     def me(self, request):
         user = request.user
         doctor = get_object_or_404(Doctor, user=user)
