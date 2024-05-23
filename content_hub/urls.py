@@ -8,8 +8,16 @@ router.register(
     "personal_stories", views.PersonalStoryViewSet, basename="personal_story"
 )
 
+personal_story_router = NestedDefaultRouter(
+    router, "personal_stories", lookup="personal_story"
+)
+personal_story_router.register(
+    "images", views.PersonalStoryImageViewSet, basename="personal_story_image"
+)
+
 urlpatterns = [
     path("", include(router.urls)),
+    path("", include(personal_story_router.urls)),
 ]
 
 

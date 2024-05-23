@@ -7,7 +7,6 @@ USER = settings.AUTH_USER_MODEL
 # Create your models here.
 
 
-# image and user will be added later
 class Personal_Story(models.Model):
     title = models.CharField(max_length=255)
     raw_content = models.TextField()
@@ -17,6 +16,13 @@ class Personal_Story(models.Model):
     @property
     def content(self):
         return markdown.markdown(self.raw_content, extensions=["extra"])
+
+
+class PersonalStoryImage(models.Model):
+    personal_story = models.ForeignKey(
+        Personal_Story, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="content_hub/images")
 
 
 # image will be added later

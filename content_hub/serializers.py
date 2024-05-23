@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.models import User
 
-from .models import Personal_Story
+from .models import Personal_Story, PersonalStoryImage
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
@@ -11,10 +11,33 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         fields = ["id", "username"]
 
 
+class PersonalStoryImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PersonalStoryImage
+        fields = ["id", "image"]
+
+    def create(self, validated_data):
+        personal_story_id = self.context["personal_story_id"]
+        personal_story = Personal_Story.objects.get(id=personal_story_id)
+        return PersonalStoryImage.objects.create(
+            personal_story=personal_story, **validated_data
+        )
+
+
 class PersonalStorySerializer(serializers.ModelSerializer):
+    images = PersonalStoryImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Personal_Story
-        fields = ["id", "user", "title", "content", "raw_content", "created_at"]
+        fields = [
+            "id",
+            "user",
+            "title",
+            "content",
+            "raw_content",
+            "images",
+            "created_at",
+        ]
 
     user = SimpleUserSerializer(read_only=True)
     content = serializers.CharField(read_only=True)
