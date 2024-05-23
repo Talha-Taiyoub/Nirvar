@@ -31,7 +31,7 @@ class TestimonialViewSet(ModelViewSet):
         if self.request.method == "PATCH":
             return UpdateTestimonialSerializer
         else:
-            return PersonalStorySerializer
+            return TestimonialSerializer
 
     def get_serializer_context(self):
         return {"user": self.request.user}
