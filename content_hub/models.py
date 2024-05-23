@@ -35,10 +35,10 @@ class PersonalStoryImage(models.Model):
     image = models.ImageField(upload_to="content_hub/images")
 
 
-# image will be added later
 class Question(models.Model):
     content = models.TextField()
     user = models.ForeignKey(USER, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="content_hub/images", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
