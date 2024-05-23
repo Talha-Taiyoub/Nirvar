@@ -253,6 +253,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
+            "title",
             "content",
             "image",
             "target_audience",
@@ -269,3 +270,40 @@ class ArticleSerializer(serializers.ModelSerializer):
         user = self.context["user"]
         article = Article.objects.create(user=user, **validated_data)
         return article
+
+
+class UpdateArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = [
+            "id",
+            "user",
+            "title",
+            "content",
+            "image",
+            "target_audience",
+            "minimum_age_required",
+            "recommendation_count",
+            "created_at",
+        ]
+
+    user = SimpleUserSerializer(read_only=True)
+    recommendation_count = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+    def save(self, **kwargs):
+        article = self.instance
+        user = self.context["user"]
+        if article.user.id == user.id:
+            article.title = self.validated_data["title"]
+            article.content = self.validated_data["content"]
+            article.target_audience = self.validated_data["target_audience"]
+            article.minimum_age_required = self.validated_data["minimum_age_required"]
+            article.image = self.validated_data["image"]
+            article.save()
+            self.instance = article
+            return self.instance
+        else:
+            raise serializers.ValidationError(
+                "This is not your article. You can't update it"
+            )

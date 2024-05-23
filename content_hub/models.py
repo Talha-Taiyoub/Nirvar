@@ -59,6 +59,7 @@ class Like(models.Model):
 
 
 class Article(models.Model):
+    title = models.TextField(blank=True, null=True)
     content = models.TextField()
     image = models.ImageField(upload_to="content_hub/images", null=True, blank=True)
     target_audience = models.CharField(

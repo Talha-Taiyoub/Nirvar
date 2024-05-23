@@ -28,6 +28,7 @@ from .serializers import (
     QuestionSerializer,
     TestimonialSerializer,
     UpdateAnswerSerializer,
+    UpdateArticleSerializer,
     UpdatePersonalStorySerializer,
     UpdateQuestionSerializer,
     UpdateTestimonialSerializer,
@@ -297,7 +298,12 @@ class ArticleViewSet(ModelViewSet):
         .select_related("user")
         .order_by("-created_at")
     )
-    serializer_class = ArticleSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return UpdateArticleSerializer
+        else:
+            return ArticleSerializer
 
     def get_serializer_context(self):
         return {"user": self.request.user}
@@ -306,6 +312,18 @@ class ArticleViewSet(ModelViewSet):
         if self.request.method in ["PUT", "POST", "DELETE"]:
             return [IsDoctor()]
         return [AllowAny()]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+        if user.id == instance.user.id:
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                data={"error": "This is not your article. You can't delete this"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED,
+            )
 
     @action(detail=False, methods=["get"])
     def me(self, request):
