@@ -81,7 +81,7 @@ class TestimonialViewSet(ModelViewSet):
 
 
 class PersonalStoryViewSet(ModelViewSet):
-    http_method_names = ["get", "patch", "post", "delete"]
+    http_method_names = ["get", "put", "post", "delete"]
     queryset = (
         Personal_Story.objects.all().select_related("user").prefetch_related("images")
     )
@@ -89,7 +89,7 @@ class PersonalStoryViewSet(ModelViewSet):
 
     def get_serializer_class(self):
 
-        if self.request.method == "PATCH":
+        if self.request.method == "PUT":
             return UpdatePersonalStorySerializer
         else:
             return PersonalStorySerializer
@@ -98,7 +98,7 @@ class PersonalStoryViewSet(ModelViewSet):
         return {"user": self.request.user}
 
     def get_permissions(self):
-        if self.request.method in ["PATCH", "POST", "DELETE"]:
+        if self.request.method in ["PUT", "POST", "DELETE"]:
             return [IsAuthenticated]
         return [AllowAny()]
 
