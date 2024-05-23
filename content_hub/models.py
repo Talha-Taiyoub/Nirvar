@@ -56,3 +56,21 @@ class Like(models.Model):
 
     class Meta:
         unique_together = ["answer", "user"]
+
+
+class Article(models.Model):
+    content = models.TextField()
+    image = models.ImageField(upload_to="content_hub/images", null=True, blank=True)
+    target_audience = models.CharField(
+        max_length=6,
+        choices=[("Male", "Male"), ("Female", "Female"), ("All", "All")],
+        default="All",
+    )
+    minimum_age_required = models.IntegerField()
+    user = models.ForeignKey(USER, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class RecommendedByDoctor(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(USER, on_delete=models.CASCADE)
