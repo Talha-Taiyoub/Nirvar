@@ -18,8 +18,10 @@ from .models import (
 from .serializers import (
     PersonalStoryImageSerializer,
     PersonalStorySerializer,
+    QuestionSerializer,
     TestimonialSerializer,
     UpdatePersonalStorySerializer,
+    UpdateQuestionSerializer,
     UpdateTestimonialSerializer,
 )
 
@@ -27,7 +29,7 @@ from .serializers import (
 # Create your views here.
 class TestimonialViewSet(ModelViewSet):
     http_method_names = ["get", "put", "post", "delete"]
-    queryset = Testimonial.objects.all().select_related("user")
+    queryset = Testimonial.objects.all().select_related("user").order_by("-created_at")
     serializer_class = TestimonialSerializer
 
     def get_serializer_class(self):
@@ -75,7 +77,11 @@ class TestimonialViewSet(ModelViewSet):
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def me(self, request):
         user = request.user
-        queryset = Testimonial.objects.filter(user_id=user.id).select_related("user")
+        queryset = (
+            Testimonial.objects.filter(user_id=user.id)
+            .select_related("user")
+            .order_by("-created_at")
+        )
         serializer = TestimonialSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -83,7 +89,10 @@ class TestimonialViewSet(ModelViewSet):
 class PersonalStoryViewSet(ModelViewSet):
     http_method_names = ["get", "put", "post", "delete"]
     queryset = (
-        Personal_Story.objects.all().select_related("user").prefetch_related("images")
+        Personal_Story.objects.all()
+        .select_related("user")
+        .prefetch_related("images")
+        .order_by("-created_at")
     )
     serializer_class = PersonalStorySerializer
 
@@ -130,6 +139,7 @@ class PersonalStoryViewSet(ModelViewSet):
             Personal_Story.objects.filter(user_id=user_id)
             .select_related("user")
             .prefetch_related("images")
+            .order_by("-created_at")
         )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -141,6 +151,7 @@ class PersonalStoryViewSet(ModelViewSet):
             Personal_Story.objects.filter(user_id=user.id)
             .select_related("user")
             .prefetch_related("images")
+            .order_by("-created_at")
         )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -156,3 +167,33 @@ class PersonalStoryImageViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {"personal_story_id": self.kwargs["personal_story_pk"]}
+
+
+class QuestionViewSet(ModelViewSet):
+    http_method_names = ["get", "put", "post", "delete"]
+    queryset = Question.objects.all().select_related("user").order_by("-created_at")
+
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return UpdateQuestionSerializer
+        else:
+            return QuestionSerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user}
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "POST", "DELETE"]:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        user = request.user
+        queryset = (
+            Question.objects.filter(user_id=user.id)
+            .select_related("user")
+            .order_by("-created_at")
+        )
+        serializer = QuestionSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

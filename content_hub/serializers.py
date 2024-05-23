@@ -2,7 +2,14 @@ from rest_framework import serializers
 
 from core.models import User
 
-from .models import Personal_Story, PersonalStoryImage, Testimonial
+from .models import (
+    Answer,
+    Like,
+    Personal_Story,
+    PersonalStoryImage,
+    Question,
+    Testimonial,
+)
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
@@ -113,3 +120,37 @@ class UpdatePersonalStorySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"error": "This is not your story. You can't update or delete this"}
             )
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ["id", "user", "image", "content", "created_at"]
+
+    user = SimpleUserSerializer(read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+    def create(self, validated_data):
+        user = self.context["user"]
+        return Question.objects.create(user=user, **validated_data)
+
+
+class UpdateQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ["id", "user", "image", "content", "created_at"]
+
+    user = SimpleUserSerializer(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+    def save(self, **kwargs):
+        question = self.instance
+        question.content = self.validated_data["content"]
+
+        if "image" in self.validated_data and self.validated_data["image"] is not None:
+            question.image = self.validated_data["image"]
+
+        question.save()
+        self.instance = question
+        return self.instance
