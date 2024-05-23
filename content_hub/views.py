@@ -228,15 +228,6 @@ class AnswerViewSet(ModelViewSet):
             return [IsAuthenticated()]
         return [AllowAny()]
 
-    # @action(detail=True, methods=["put"], permission_classes=[IsDoctor])
-    # def verify(self, request):
-    #     answer = get_object_or_404(Answer, pk=self.kwargs["pk"])
-    #     serializer = VerifyAnswerSerializer(answer, data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     answer = serializer.save()
-    #     serializer = AnswerSerializer(answer)
-    #     return Response(serializer.data)
-
     @action(detail=True, methods=["put"], permission_classes=[IsDoctor])
     def verify(self, request, *args, **kwargs):
         answer = get_object_or_404(
