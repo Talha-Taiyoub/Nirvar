@@ -190,3 +190,21 @@ class UpdateAnswerSerializer(serializers.ModelSerializer):
         answer.save()
         self.instance = answer
         return self.instance
+
+
+class VerifyAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ["verified"]
+
+    def save(self, **kwargs):
+        answer = self.instance
+        if answer.verified == False:
+            answer.verified = self.validated_data["verified"]
+            answer.save()
+            self.instance = answer
+            return self.instance
+        else:
+            raise serializers.ValidationError(
+                "This comment is verified, you can't change it"
+            )

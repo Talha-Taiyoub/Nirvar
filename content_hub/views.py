@@ -1,4 +1,5 @@
 from django.db.models import Avg, Count, Min, Sum
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
@@ -25,6 +26,7 @@ from .serializers import (
     UpdatePersonalStorySerializer,
     UpdateQuestionSerializer,
     UpdateTestimonialSerializer,
+    VerifyAnswerSerializer,
 )
 
 
@@ -225,3 +227,23 @@ class AnswerViewSet(ModelViewSet):
         if self.request.method in ["PUT", "POST", "DELETE"]:
             return [IsAuthenticated()]
         return [AllowAny()]
+
+    # @action(detail=True, methods=["put"], permission_classes=[IsDoctor])
+    # def verify(self, request):
+    #     answer = get_object_or_404(Answer, pk=self.kwargs["pk"])
+    #     serializer = VerifyAnswerSerializer(answer, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     answer = serializer.save()
+    #     serializer = AnswerSerializer(answer)
+    #     return Response(serializer.data)
+
+    @action(detail=True, methods=["put"], permission_classes=[IsDoctor])
+    def verify(self, request, *args, **kwargs):
+        answer = get_object_or_404(
+            Answer, pk=self.kwargs["pk"], question_id=self.kwargs["question_pk"]
+        )
+        serializer = VerifyAnswerSerializer(answer, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        answer = serializer.save()
+        serializer = AnswerSerializer(answer)
+        return Response(serializer.data)
