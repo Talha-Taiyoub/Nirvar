@@ -16,10 +16,12 @@ from .models import (
     Testimonial,
 )
 from .serializers import (
+    AnswerSerializer,
     PersonalStoryImageSerializer,
     PersonalStorySerializer,
     QuestionSerializer,
     TestimonialSerializer,
+    UpdateAnswerSerializer,
     UpdatePersonalStorySerializer,
     UpdateQuestionSerializer,
     UpdateTestimonialSerializer,
@@ -197,3 +199,29 @@ class QuestionViewSet(ModelViewSet):
         )
         serializer = QuestionSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AnswerViewSet(ModelViewSet):
+    http_method_names = ["get", "put", "post", "delete"]
+
+    def get_queryset(self):
+        return (
+            Answer.objects.filter(question__id=self.kwargs["question_pk"])
+            .select_related("user")
+            .select_related("question")
+            .order_by("-created_at")
+        )
+
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return UpdateAnswerSerializer
+        else:
+            return AnswerSerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user, "question_id": self.kwargs["question_pk"]}
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "POST", "DELETE"]:
+            return [IsAuthenticated()]
+        return [AllowAny()]

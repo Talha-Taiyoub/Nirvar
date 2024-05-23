@@ -154,3 +154,39 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
         question.save()
         self.instance = question
         return self.instance
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ["id", "user", "question", "content", "verified", "created_at"]
+
+    user = SimpleUserSerializer(read_only=True)
+    question = serializers.PrimaryKeyRelatedField(read_only=True)
+    verified = serializers.BooleanField(read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+    def create(self, validated_data):
+        user = self.context["user"]
+        question_id = self.context["question_id"]
+        return Answer.objects.create(
+            user=user, question_id=question_id, **validated_data
+        )
+
+
+class UpdateAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ["id", "user", "question", "content", "verified", "created_at"]
+
+    user = SimpleUserSerializer(read_only=True)
+    question = serializers.PrimaryKeyRelatedField(read_only=True)
+    verified = serializers.BooleanField(read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+    def save(self, **kwargs):
+        answer = self.instance
+        answer.content = self.validated_data["content"]
+        answer.save()
+        self.instance = answer
+        return self.instance

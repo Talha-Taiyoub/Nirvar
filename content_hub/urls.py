@@ -17,9 +17,13 @@ personal_story_router.register(
     "images", views.PersonalStoryImageViewSet, basename="personal_story_image"
 )
 
+question_router = NestedDefaultRouter(router, "questions", lookup="question")
+question_router.register("answers", views.AnswerViewSet, basename="answer")
+
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(personal_story_router.urls)),
+    path("", include(question_router.urls)),
 ]
 
 
