@@ -4,10 +4,12 @@ from core.models import User
 
 from .models import (
     Answer,
+    Article,
     Like,
     Personal_Story,
     PersonalStoryImage,
     Question,
+    RecommendedByDoctor,
     Testimonial,
 )
 
@@ -125,9 +127,10 @@ class UpdatePersonalStorySerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["id", "user", "image", "content", "created_at"]
+        fields = ["id", "user", "image", "content", "answer_count", "created_at"]
 
     user = SimpleUserSerializer(read_only=True)
+    answer_count = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
 
     def create(self, validated_data):
@@ -138,9 +141,10 @@ class QuestionSerializer(serializers.ModelSerializer):
 class UpdateQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["id", "user", "image", "content", "created_at"]
+        fields = ["id", "user", "image", "content", "answer_count", "created_at"]
 
     user = SimpleUserSerializer(read_only=True)
+    answer_count = serializers.IntegerField(read_only=True)
     id = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
 
@@ -241,3 +245,27 @@ class LikeSerializer(serializers.ModelSerializer):
 
     answer = serializers.PrimaryKeyRelatedField(read_only=True)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+
+class ArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = [
+            "id",
+            "user",
+            "content",
+            "image",
+            "target_audience",
+            "minimum_age_required",
+            "recommendation_count",
+            "created_at",
+        ]
+
+    user = SimpleUserSerializer(read_only=True)
+    recommendation_count = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+    def create(self, validated_data):
+        user = self.context["user"]
+        article = Article.objects.create(user=user, **validated_data)
+        return article

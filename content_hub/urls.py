@@ -23,6 +23,9 @@ answer_router.register("answers", views.AnswerViewSet, basename="answer")
 like_router = NestedDefaultRouter(answer_router, "answers", lookup="answer")
 like_router.register("likes", views.LikeViewSet, basename="like")
 
+router.register("articles", views.ArticleViewSet, basename="article")
+
+
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(personal_story_image_router.urls)),

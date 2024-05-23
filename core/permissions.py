@@ -7,5 +7,5 @@ class IsDoctor(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
 
-        # Check if the user has a doctor attribute and if the doctor is verified
-        return hasattr(request.user, "doctor") and request.user.doctor.verified
+        else:
+            return hasattr(request.user, "doctor") and request.user.doctor.verified

@@ -11,14 +11,17 @@ from core.permissions import IsDoctor
 
 from .models import (
     Answer,
+    Article,
     Like,
     Personal_Story,
     PersonalStoryImage,
     Question,
+    RecommendedByDoctor,
     Testimonial,
 )
 from .serializers import (
     AnswerSerializer,
+    ArticleSerializer,
     LikeSerializer,
     PersonalStoryImageSerializer,
     PersonalStorySerializer,
@@ -177,7 +180,12 @@ class PersonalStoryImageViewSet(ModelViewSet):
 
 class QuestionViewSet(ModelViewSet):
     http_method_names = ["get", "put", "post", "delete"]
-    queryset = Question.objects.all().select_related("user").order_by("-created_at")
+    queryset = (
+        Question.objects.all()
+        .annotate(answer_count=Count("answer"))
+        .select_related("user")
+        .order_by("-created_at")
+    )
 
     def get_serializer_class(self):
         if self.request.method == "PUT":
@@ -199,6 +207,7 @@ class QuestionViewSet(ModelViewSet):
         queryset = (
             Question.objects.filter(user_id=user.id)
             .select_related("user")
+            .annotate(answer_count=Count("answer"))
             .order_by("-created_at")
         )
         serializer = QuestionSerializer(queryset, many=True)
@@ -278,3 +287,34 @@ class LikeViewSet(ModelViewSet):
 
         serializer = LikeSerializer(like)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ArticleViewSet(ModelViewSet):
+    http_method_names = ["get", "put", "post", "delete"]
+    queryset = (
+        Article.objects.all()
+        .annotate(recommendation_count=Count("recommendedbydoctor"))
+        .select_related("user")
+        .order_by("-created_at")
+    )
+    serializer_class = ArticleSerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user}
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "POST", "DELETE"]:
+            return [IsDoctor()]
+        return [AllowAny()]
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        user = request.user
+        queryset = (
+            Article.objects.filter(user_id=user.id)
+            .annotate(recommendation_count=Count("recommendedbydoctor"))
+            .select_related("user")
+            .order_by("-created_at")
+        )
+        serializer = ArticleSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
