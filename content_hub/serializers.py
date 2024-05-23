@@ -159,11 +159,20 @@ class UpdateQuestionSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        fields = ["id", "user", "question", "content", "verified", "created_at"]
+        fields = [
+            "id",
+            "user",
+            "question",
+            "content",
+            "verified",
+            "like_count",
+            "created_at",
+        ]
 
     user = SimpleUserSerializer(read_only=True)
     question = serializers.PrimaryKeyRelatedField(read_only=True)
     verified = serializers.BooleanField(read_only=True)
+    like_count = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
 
     def create(self, validated_data):
@@ -177,11 +186,20 @@ class AnswerSerializer(serializers.ModelSerializer):
 class UpdateAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
-        fields = ["id", "user", "question", "content", "verified", "created_at"]
+        fields = [
+            "id",
+            "user",
+            "question",
+            "content",
+            "verified",
+            "like_count",
+            "created_at",
+        ]
 
     user = SimpleUserSerializer(read_only=True)
     question = serializers.PrimaryKeyRelatedField(read_only=True)
     verified = serializers.BooleanField(read_only=True)
+    like_count = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
 
     def save(self, **kwargs):
@@ -208,3 +226,12 @@ class VerifyAnswerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "This comment is verified, you can't change it"
             )
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ["id", "answer", "user"]
+
+    answer = serializers.PrimaryKeyRelatedField(read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)

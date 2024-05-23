@@ -2,6 +2,7 @@ from django.db.models import Avg, Count, Min, Sum
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -18,6 +19,7 @@ from .models import (
 )
 from .serializers import (
     AnswerSerializer,
+    LikeSerializer,
     PersonalStoryImageSerializer,
     PersonalStorySerializer,
     QuestionSerializer,
@@ -209,6 +211,7 @@ class AnswerViewSet(ModelViewSet):
     def get_queryset(self):
         return (
             Answer.objects.filter(question__id=self.kwargs["question_pk"])
+            .annotate(like_count=Count("like"))
             .select_related("user")
             .select_related("question")
             .order_by("-created_at")
@@ -238,3 +241,28 @@ class AnswerViewSet(ModelViewSet):
         answer = serializer.save()
         serializer = AnswerSerializer(answer)
         return Response(serializer.data)
+
+
+class LikeViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["post", "delete"]
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+
+    def create(self, request, *args, **kwargs):
+        answer_id = self.kwargs.get("answer_pk")
+        try:
+            answer = Answer.objects.get(id=answer_id)
+        except Answer.DoesNotExist:
+            raise ValidationError({"detail": "Answer not found."})
+
+        # Check if the like already exists
+        user = request.user
+        if Like.objects.filter(user=user, answer=answer).exists():
+            raise ValidationError({"detail": "You have already liked this answer."})
+
+        like = Like(user=user, answer=answer)
+        like.save()
+
+        serializer = LikeSerializer(like)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
