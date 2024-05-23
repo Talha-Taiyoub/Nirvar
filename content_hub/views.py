@@ -4,14 +4,72 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Answer, Like, Personal_Story, PersonalStoryImage, Question
+from .models import (
+    Answer,
+    Like,
+    Personal_Story,
+    PersonalStoryImage,
+    Question,
+    Testimonial,
+)
 from .serializers import (
     PersonalStoryImageSerializer,
     PersonalStorySerializer,
+    TestimonialSerializer,
     UpdatePersonalStorySerializer,
+    UpdateTestimonialSerializer,
 )
 
+
 # Create your views here.
+class TestimonialViewSet(ModelViewSet):
+    http_method_names = ["get", "patch", "post", "delete"]
+    queryset = Testimonial.objects.all().select_related("user")
+    serializer_class = TestimonialSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "PATCH":
+            return UpdateTestimonialSerializer
+        else:
+            return PersonalStorySerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user}
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = UpdateTestimonialSerializer(
+            instance, data=request.data, context={"user": request.user}
+        )
+        serializer.is_valid(raise_exception=True)
+        testimonial = serializer.save()
+        serializer = TestimonialSerializer(testimonial)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+        if user.id == instance.user.id:
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                data={"error": "This is not your testimonial. You can't delete this"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED,
+            )
+
+    # @action(detail=False, methods=["get"], url_path=r"user/(?P<user_id>\d+)")
+    # def testimonial_by_user(self, request, user_id=None):
+    #     queryset = Testimonial.objects.filter(user_id=user_id).select_related("user")
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        user = request.user
+        queryset = Testimonial.objects.filter(user_id=user.id).select_related("user")
+        serializer = TestimonialSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PersonalStoryViewSet(ModelViewSet):

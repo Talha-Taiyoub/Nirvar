@@ -7,11 +7,21 @@ USER = settings.AUTH_USER_MODEL
 # Create your models here.
 
 
+class Testimonial(models.Model):
+    raw_content = models.TextField()
+    user = models.ForeignKey(USER, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def content(self):
+        return markdown.markdown(self.raw_content, extensions=["extra"])
+
+
 class Personal_Story(models.Model):
     title = models.CharField(max_length=255)
     raw_content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(USER, on_delete=models.CASCADE, default=1)
+    user = models.ForeignKey(USER, on_delete=models.CASCADE)
 
     @property
     def content(self):

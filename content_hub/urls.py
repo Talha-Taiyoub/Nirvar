@@ -8,6 +8,8 @@ router.register(
     "personal_stories", views.PersonalStoryViewSet, basename="personal_story"
 )
 
+router.register("testimonials", views.TestimonialViewSet, basename="testimonial")
+
 personal_story_router = NestedDefaultRouter(
     router, "personal_stories", lookup="personal_story"
 )

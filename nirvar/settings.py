@@ -83,7 +83,7 @@ WSGI_APPLICATION = "nirvar.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "nirvar",
+        "NAME": "nirvar2",
         "HOST": "127.0.0.1",
         "USER": "root",
         "PASSWORD": "marakha7057",
