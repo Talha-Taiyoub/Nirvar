@@ -231,6 +231,18 @@ class AnswerViewSet(ModelViewSet):
             return [IsAuthenticated()]
         return [AllowAny()]
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+        if user.id == instance.user.id:
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                data={"error": "This is not your answer. You can't delete this"},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED,
+            )
+
     @action(detail=True, methods=["put"], permission_classes=[IsDoctor])
     def verify(self, request, *args, **kwargs):
         answer = get_object_or_404(

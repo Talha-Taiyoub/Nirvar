@@ -204,10 +204,16 @@ class UpdateAnswerSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         answer = self.instance
-        answer.content = self.validated_data["content"]
-        answer.save()
-        self.instance = answer
-        return self.instance
+        user = self.context["user"]
+        if answer.user.id == user.id:
+            answer.content = self.validated_data["content"]
+            answer.save()
+            self.instance = answer
+            return self.instance
+        else:
+            raise serializers.ValidationError(
+                "This is not your answer. You can't update it"
+            )
 
 
 class VerifyAnswerSerializer(serializers.ModelSerializer):
