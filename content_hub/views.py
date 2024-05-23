@@ -41,7 +41,7 @@ class TestimonialViewSet(ModelViewSet):
 
     def get_permissions(self):
         if self.request.method in ["PUT", "POST", "DELETE"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return [AllowAny()]
 
     def update(self, request, *args, **kwargs):
@@ -99,7 +99,7 @@ class PersonalStoryViewSet(ModelViewSet):
 
     def get_permissions(self):
         if self.request.method in ["PUT", "POST", "DELETE"]:
-            return [IsAuthenticated]
+            return [IsAuthenticated()]
         return [AllowAny()]
 
     def update(self, request, *args, **kwargs):
