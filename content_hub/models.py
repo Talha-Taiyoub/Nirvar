@@ -75,3 +75,11 @@ class Article(models.Model):
 class RecommendedByDoctor(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     user = models.ForeignKey(USER, on_delete=models.CASCADE)
+
+
+class SymptomsDiary(models.Model):
+    user = models.ForeignKey(USER, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    finish_date = models.DateField(null=True, blank=True)
+    pain_intensity = models.TextField()
+    other_symptoms = models.TextField()

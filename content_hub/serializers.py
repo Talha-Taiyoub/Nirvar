@@ -10,6 +10,7 @@ from .models import (
     PersonalStoryImage,
     Question,
     RecommendedByDoctor,
+    SymptomsDiary,
     Testimonial,
 )
 
@@ -306,4 +307,79 @@ class UpdateArticleSerializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError(
                 "This is not your article. You can't update it"
+            )
+
+
+class RecommendArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecommendedByDoctor
+        fields = ["id", "article", "user"]
+
+    article = serializers.PrimaryKeyRelatedField(read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+
+class SymptomsDiarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SymptomsDiary
+        fields = [
+            "id",
+            "user",
+            "start_date",
+            "finish_date",
+            "pain_intensity",
+            "other_symptoms",
+        ]
+
+    user = SimpleUserSerializer(read_only=True)
+    start_date = serializers.DateField(
+        format="%d-%m-%Y", input_formats=["%d-%m-%Y", "%Y-%m-%d"]
+    )
+
+    finish_date = serializers.DateField(
+        format="%d-%m-%Y", input_formats=["%d-%m-%Y", "%Y-%m-%d"]
+    )
+
+    def create(self, validated_data):
+        user = self.context["user"]
+        diary = SymptomsDiary.objects.create(user=user, **validated_data)
+        return diary
+
+
+class UpdateSymptomsDiarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SymptomsDiary
+        fields = [
+            "id",
+            "user",
+            "start_date",
+            "finish_date",
+            "pain_intensity",
+            "other_symptoms",
+        ]
+
+    user = SimpleUserSerializer(read_only=True)
+    start_date = serializers.DateField(
+        format="%d-%m-%Y", input_formats=["%d-%m-%Y", "%Y-%m-%d"]
+    )
+
+    finish_date = serializers.DateField(
+        format="%d-%m-%Y", input_formats=["%d-%m-%Y", "%Y-%m-%d"]
+    )
+
+    def save(self, **kwargs):
+        diary = self.instance
+        user = self.context["user"]
+        if diary.user.id == user.id:
+            diary.start_date = self.validated_data["start_date"]
+            diary.finish_date = self.validated_data["finish_date"]
+            diary.pain_intensity = self.validated_data["pain_intensity"]
+
+            diary.other_symptoms = self.validated_data["other_symptoms"]
+            diary.save()
+            self.instance = diary
+            return self.instance
+        else:
+            raise serializers.ValidationError(
+                "This is not your record. You can't update it"
             )

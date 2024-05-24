@@ -17,6 +17,7 @@ from .models import (
     PersonalStoryImage,
     Question,
     RecommendedByDoctor,
+    SymptomsDiary,
     Testimonial,
 )
 from .serializers import (
@@ -26,11 +27,14 @@ from .serializers import (
     PersonalStoryImageSerializer,
     PersonalStorySerializer,
     QuestionSerializer,
+    RecommendArticleSerializer,
+    SymptomsDiarySerializer,
     TestimonialSerializer,
     UpdateAnswerSerializer,
     UpdateArticleSerializer,
     UpdatePersonalStorySerializer,
     UpdateQuestionSerializer,
+    UpdateSymptomsDiarySerializer,
     UpdateTestimonialSerializer,
     VerifyAnswerSerializer,
 )
@@ -336,3 +340,54 @@ class ArticleViewSet(ModelViewSet):
         )
         serializer = ArticleSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RecommendArticleViewSet(ModelViewSet):
+    http_method_names = ["get", "post", "delete"]
+    queryset = (
+        RecommendedByDoctor.objects.all()
+        .select_related("user")
+        .select_related("article")
+    )
+    serializer_class = RecommendArticleSerializer
+
+    def get_permissions(self):
+        if self.request.method in ["POST", "DELETE"]:
+            return [IsDoctor()]
+        return [AllowAny()]
+
+    def create(self, request, *args, **kwargs):
+        article_id = self.kwargs.get("article_pk")
+        try:
+            article = Article.objects.get(id=article_id)
+        except Article.DoesNotExist:
+            raise ValidationError({"detail": "Article not found."})
+
+        # Check if the like already exists
+        user = request.user
+        if RecommendedByDoctor.objects.filter(user=user, article=article).exists():
+            raise ValidationError({"detail": "You have already liked this answer."})
+
+        recommend = RecommendedByDoctor(user=user, article=article)
+        recommend.save()
+
+        serializer = RecommendArticleSerializer(recommend)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class SymptomsDiaryViewSet(ModelViewSet):
+    def get_queryset(self):
+        return SymptomsDiary.objects.filter(
+            user_id=self.request.user.id
+        ).select_related("user")
+
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return UpdateSymptomsDiarySerializer
+        else:
+            return SymptomsDiarySerializer
+
+    def get_serializer_context(self):
+        return {"user": self.request.user}
+
+    permission_classes = [IsAuthenticated]

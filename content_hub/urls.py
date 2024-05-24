@@ -24,11 +24,17 @@ like_router = NestedDefaultRouter(answer_router, "answers", lookup="answer")
 like_router.register("likes", views.LikeViewSet, basename="like")
 
 router.register("articles", views.ArticleViewSet, basename="article")
+recommend_article_router = NestedDefaultRouter(router, "articles", lookup="article")
+recommend_article_router.register(
+    "recommendations", views.RecommendArticleViewSet, basename="recommend"
+)
 
+router.register("symptom_diaries", views.SymptomsDiaryViewSet, basename="symptom_diary")
 
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(personal_story_image_router.urls)),
     path("", include(answer_router.urls)),
     path("", include(like_router.urls)),
+    path("", include(recommend_article_router.urls)),
 ]
